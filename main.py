@@ -9,15 +9,17 @@ download_dir = 'schedule_download/'
 temp_dir = 'temp/'
 output_dir = 'output/'
 
-# Download file path
-file_path = os.path.join(download_dir, "Semester-Planung.zip")
+# Other paths
+file_path = os.path.join(download_dir, "Semester-Planung.zip") # zip file
+temp_converted_dir = os.path.join(temp_dir, "converted/") # dir for csv files from scan
+
 
 # DEBUGGING
 enable_downloads = False
 
 #region Setup
 # Create directories
-for directory in [download_dir, temp_dir, output_dir]:
+for directory in [download_dir, temp_dir, output_dir, temp_converted_dir]:
     if not os.path.exists(directory):
         os.makedirs(directory)
 
@@ -93,6 +95,9 @@ print("extracted text from pdf.")
 #endregion
 
 #region 5. Save CSV files
+
+##### SAVE CSV FILES #####
+
 import pandas as pd
 
 with pdfplumber.open(pdf_path) as pdf:
@@ -113,10 +118,13 @@ with pdfplumber.open(pdf_path) as pdf:
         df = pd.DataFrame(data)
         
         # Save each page's DataFrame as a separate CSV file
-        csv_path = f'{temp_dir}/converted_page_{page_num + 1}.csv'
+        csv_path = f'{temp_converted_dir}/converted_page_{page_num + 1}.csv'
         df.to_csv(csv_path, index=False)
 
         print(f"CSV for page {page_num + 1} saved at: {csv_path}")
+#endregion
+
+#region 6. Save CSV files
 
 
 
