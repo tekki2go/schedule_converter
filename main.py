@@ -1,15 +1,24 @@
+# Copyright (C) 2024  Marc Heß (tekki2go)
+
 import requests
 import os
 
-# Setting
+# Settings
 download_url = 'https://owncloud.dhbw-heidenheim.de/index.php/s/ddgLVIobcYSZi0e/download'
 download_dir = 'schedule_download/'
+temp_dir = 'temp/'
+output_dir = 'output/'
 
 # Download file path
 file_path = os.path.join(download_dir, "Semester-Planung.zip")
 
 # DEBUGGING
 enable_downloads = False
+
+
+#region 1. download ZIP
+
+##### DOWNLOAD ZIP #####
 
 if enable_downloads:
     try:
@@ -25,8 +34,9 @@ if enable_downloads:
         print(f'File download failed! \n{e}')
 else:
     print(f'Skipped download...')
+#endregion
 
-#region 1. extracting ZIP
+#region 2. extracting ZIP
 
 ##### EXTRACT ZIP #####
 
@@ -41,7 +51,7 @@ except Exception as e:
 
 #endregion
 
-#region 2. get newest PDF
+#region 3. get newest PDF
 
 ##### GET NEWEST PDF #####
 
@@ -61,9 +71,9 @@ pdf_path = os.path.join(file_path, newest_file)
 print(f'Newest PDF file: {pdf_path}')
 #endregion
 
-#region 3. extract page content from PDF
+#region 4. extract page content from PDF
 
-##### EXTRACT PAGE CONTENT FROM PDF
+##### EXTRACT PAGE CONTENT FROM PDF #####
 
 # Using pdfplumber to make data extraction more accurate
 import pdfplumber
@@ -72,7 +82,50 @@ extracted_text = []
 with pdfplumber.open(pdf_path) as pdf:
     for page_num in range(len(pdf.pages)):
         extracted_text.append(pdf.pages[page_num].extract_text())
-
-extracted_text[:1]
+print("extracted text from pdf.")
 #endregion
 
+#region 5. Save CSV files
+import pandas as pd
+
+with pdfplumber.open(pdf_path) as pdf:
+    for page_num in range(len(pdf.pages)):
+        # Extract text for the current page
+        extracted_text = pdf.pages[page_num].extract_text()
+        
+        # Split the text into lines
+        lines = extracted_text.split('\n')
+        
+        # Process the lines to extract table-like data
+        data = []
+        for line in lines:
+            row = line.split()  # Split by spaces
+            data.append(row)
+        
+        # Create a DataFrame from the extracted data
+        df = pd.DataFrame(data)
+        
+        # Save each page's DataFrame as a separate CSV file
+        csv_path = f'{temp_dir}/converted_page_{page_num + 1}.csv'
+        df.to_csv(csv_path, index=False)
+
+        print(f"CSV for page {page_num + 1} saved at: {csv_path}")
+
+
+
+#region LICENSE
+"""
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+#endregion
