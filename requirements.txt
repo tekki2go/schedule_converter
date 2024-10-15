@@ -1,3 +1,6 @@
 requests
-pdfplumber
+ghostscript
+camelot-py[all]
+excalibur-py
 pandas
+PyPDF2<3.0
