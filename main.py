@@ -15,6 +15,13 @@ file_path = os.path.join(download_dir, "Semester-Planung.zip")
 # DEBUGGING
 enable_downloads = False
 
+#region Setup
+# Create directories
+for directory in [download_dir, temp_dir, output_dir]:
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+#endregion
 
 #region 1. download ZIP
 
